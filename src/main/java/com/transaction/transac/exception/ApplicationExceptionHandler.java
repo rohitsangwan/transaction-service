@@ -32,4 +32,20 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(baseResponseDTO, HttpStatus.OK);
     }
 
+    @ExceptionHandler(ServiceCallException.class)
+    public ResponseEntity<BaseResponse> handleServiceCallException(ServiceCallException e){
+        logger.error("ServiceCallException: " + e.getStackTrace());
+        BaseResponse baseResponseDTO = new BaseResponse();
+        baseResponseDTO.setMetaDTO(new MetaDTO(e.getErrorCode().getCode(), e.getErrorCode().getErrorMessage(), MDC.get(REQUEST_ID), MDC.get(RESPONSE_ID)));
+        return new ResponseEntity<>(baseResponseDTO, HttpStatus.OK);
+    }
+
+    @ExceptionHandler(InvalidAccountNumberException.class)
+    public ResponseEntity<BaseResponse> handleInvalidAccountNumberException(InvalidAccountNumberException e){
+        logger.error("InvalidAccountNumberException: " + e.getStackTrace());
+        BaseResponse baseResponseDTO = new BaseResponse();
+        baseResponseDTO.setMetaDTO(new MetaDTO(e.getErrorCode().getCode(), e.getErrorCode().getErrorMessage(), MDC.get(REQUEST_ID), MDC.get(RESPONSE_ID)));
+        return new ResponseEntity<>(baseResponseDTO, HttpStatus.OK);
+    }
+
 }

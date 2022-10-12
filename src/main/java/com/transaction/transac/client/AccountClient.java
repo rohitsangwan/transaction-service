@@ -60,7 +60,7 @@ public class AccountClient {
         }
     }
 
-    public String updateAccountBalance(DepositResponseDTO depositResponseDTO) throws ServiceCallException {
+    public void updateAccountBalance(DepositResponseDTO depositResponseDTO) throws ServiceCallException {
         StringBuilder urlBuilder = new StringBuilder(accountBaseUrl);
         urlBuilder.append(ApiEndpoints.UPDATE_ACCOUNT_BALANCE_ENDPOINT);
         HttpHeaders headers = new HttpHeaders();
@@ -70,10 +70,7 @@ public class AccountClient {
             ResponseEntity<BaseResponse> response = restTemplate.exchange(urlBuilder.toString(), HttpMethod.PUT, requestEntity, BaseResponse.class);
             logger.info("[updateAccountBalance] response : {}", response);
 
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("[updateAccountBalance] account balance updated successfully : {}", response);
-                return Constants.SUCCESS;
-            } else {
+            if (!response.getStatusCode().is2xxSuccessful()) {
                 logger.error("[updateAccountBalance] Exception occurred while updating the accountBalance for account: {}", depositResponseDTO.getAccountNumber());
                 throw new ServiceCallException(ErrorCode.ACCOUNT_BALANCE_UPDATE_FAILED,
                         String.format(ErrorCode.ACCOUNT_BALANCE_UPDATE_FAILED.getErrorMessage(), depositResponseDTO.getAccountBalance()),

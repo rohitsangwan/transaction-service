@@ -33,7 +33,6 @@ public class TransactionService {
     @Autowired
     private TransactionServiceHelper transactionServiceHelper;
 
-    @Transactional
     public DepositResponseDTO depositAmount(DepositRequestDTO depositRequestDTO, String userId) throws ServiceCallException, InvalidAccountNumberException {
         logger.info("[depositAmount] depositing amount for userId : {}", userId);
         TransactionModel transactionModel = transactionRepository.findByUserId(userId);
@@ -47,13 +46,17 @@ public class TransactionService {
             if (txnModel.getAccountNumber().equals(depositRequestDTO.getAccountNumber())) {
                 txnModel = transactionServiceHelper.updateBalance(txnModel, depositRequestDTO.getDepositAmount());
                 BeanUtils.copyProperties(txnModel, depositResponseDTO);
-                String balanceUpdated = accountClient.updateAccountBalance(depositResponseDTO);
-                if (balanceUpdated.equals(Constants.SUCCESS))
-                    transactionRepository.save(txnModel);
+                try {
+                    accountClient.updateAccountBalance(depositResponseDTO);
+                } catch (ServiceCallException e) {
+                    throw new ServiceCallException(ErrorCode.ACCOUNT_BALANCE_UPDATE_FAILED,
+                            String.format(ErrorCode.ACCOUNT_BALANCE_UPDATE_FAILED.getErrorMessage(), depositResponseDTO.getAccountNumber()),
+                            ErrorCode.ACCOUNT_BALANCE_UPDATE_FAILED.getDisplayMessage());
+                }
+                transactionRepository.save(txnModel);
                 return depositResponseDTO;
             } else {
                 logger.error("[depositAmount] incorrect accountNumber of userId : {}", userId);
-                transactionRepository.save(txnModel);
                 throw new InvalidAccountNumberException(ErrorCode.INVALID_ACCOUNT_NUMBER,
                         String.format(ErrorCode.INVALID_ACCOUNT_NUMBER.getErrorMessage(), userId),
                         ErrorCode.INVALID_ACCOUNT_NUMBER.getDisplayMessage());
@@ -62,9 +65,14 @@ public class TransactionService {
             if (transactionModel.getAccountNumber().equals(depositRequestDTO.getAccountNumber())) {
                 transactionModel = transactionServiceHelper.updateBalance(transactionModel, depositRequestDTO.getDepositAmount());
                 BeanUtils.copyProperties(transactionModel, depositResponseDTO);
-                String balanceUpdated = accountClient.updateAccountBalance(depositResponseDTO);
-                if (balanceUpdated.equals(Constants.SUCCESS))
-                    transactionRepository.save(transactionModel);
+                try {
+                    accountClient.updateAccountBalance(depositResponseDTO);
+                } catch (ServiceCallException e) {
+                    throw new ServiceCallException(ErrorCode.ACCOUNT_BALANCE_UPDATE_FAILED,
+                            String.format(ErrorCode.ACCOUNT_BALANCE_UPDATE_FAILED.getErrorMessage(), depositResponseDTO.getAccountNumber()),
+                            ErrorCode.ACCOUNT_BALANCE_UPDATE_FAILED.getDisplayMessage());
+                }
+                transactionRepository.save(transactionModel);
                 return depositResponseDTO;
             } else {
                 logger.error("[depositAmount] incorrect accountNumber of userId : {}", userId);

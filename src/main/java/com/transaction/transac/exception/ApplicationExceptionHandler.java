@@ -37,7 +37,7 @@ public class ApplicationExceptionHandler {
         logger.error("ServiceCallException: " + e.getStackTrace());
         BaseResponse baseResponseDTO = new BaseResponse();
         baseResponseDTO.setMetaDTO(new MetaDTO(e.getErrorCode().getCode(), e.getErrorCode().getErrorMessage(), MDC.get(REQUEST_ID), MDC.get(RESPONSE_ID)));
-        return new ResponseEntity<>(baseResponseDTO, HttpStatus.OK);
+        return new ResponseEntity<>(baseResponseDTO, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InvalidAccountNumberException.class)

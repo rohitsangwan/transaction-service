@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionModel, Integer>{
+    TransactionModel findByUserId(String userId);
 }

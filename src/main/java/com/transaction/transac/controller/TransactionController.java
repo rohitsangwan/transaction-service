@@ -2,6 +2,10 @@ package com.transaction.transac.controller;
 
 import com.transaction.transac.dto.BaseResponse;
 import com.transaction.transac.dto.request.ActivateAccountDTO;
+import com.transaction.transac.dto.request.DepositRequestDTO;
+import com.transaction.transac.exception.AccountActivationFailedException;
+import com.transaction.transac.exception.InvalidAccountNumberException;
+import com.transaction.transac.exception.ServiceCallException;
 import com.transaction.transac.services.TransactionService;
 import com.transaction.transac.utils.CreateMetaData;
 import org.slf4j.Logger;
@@ -19,11 +23,10 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-    @PostMapping("/activate/{userId}")
-    public ResponseEntity<BaseResponse> activateAccount(@PathVariable("userId") String userId,
-                                                        @RequestBody ActivateAccountDTO activateAccountDTO){
-        BaseResponse baseResponse=new BaseResponse<>();
-        baseResponse.setData(transactionService.activateUserAccount(activateAccountDTO, userId));
+    @PostMapping("/deposit/{userId}")
+    public ResponseEntity<BaseResponse> deposit(@PathVariable("userId") String userId, @RequestBody DepositRequestDTO depositRequestDTO) throws ServiceCallException, InvalidAccountNumberException {
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setData(transactionService.depositAmount(depositRequestDTO, userId));
         baseResponse.setMetaDTO(CreateMetaData.createSuccessMetaData());
         return new ResponseEntity<>(baseResponse, HttpStatus.OK);
     }
